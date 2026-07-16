@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Meridiem Fiduciaire — comptabilité, fiscalité et conseil aux PME à Nyon. Démonstration réalisée par Wahl BI Consulting.">
+<link rel="icon" href="data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'><text%20y='.9em'%20font-size='90'>📊</text></svg>">
+<title>Meridiem Fiduciaire — Comptabilité, fiscalité & conseil aux PME · Nyon</title>
+<style>
+  /* =========================================================
+     MERIDIEM FIDUCIAIRE — site vitrine de démonstration
+     Parti-pris : « grand-livre de nuit » — sérénité, rigueur,
+     précision. Serif classique sur bleu-nuit ardoise, accent
+     vert sarcelle froid, or FIN uniquement en trait/hairline.
+     100% autonome (aucune requête externe, aucune photo).
+     ========================================================= */
+
+  :root{
+    /* Fonds nuit ardoise */
+    --ink:      #08151f;
+    --night:    #0c1e2e;
+    --slate:    #14293a;
+    --slate-2:  #1a3145;
+    /* Texte */
+    --fg:       #e9f0f4;
+    --fg-dim:   #94a9b8;
+    --fg-mute:  #6f8698;
+    /* Accents */
+    --teal:     #45b3a9;   /* vert sarcelle — accent principal */
+    --teal-br:  #6fd2c8;   /* teal clair pour texte/liens sur nuit */
+    --steel:    #6c9cbc;   /* bleu acier — accent secondaire */
+    --gold:     #c6a867;   /* or fin — trait seulement */
+    --gold-br:  #ddc28a;
+    /* Papier (sections claires) */
+    --paper:    #e6ebee;
+    --paper-2:  #dbe2e6;
+    --paper-ink:#0c1e2e;
+    --paper-dim:#4c6272;
+    /* Traits */
+    --hair:      rgba(198,168,103,.30);   /* or */
+    --hair-cool: rgba(139,168,188,.16);   /* froid */
+    --hair-soft: rgba(233,240,244,.09);
+
+    --maxw: 1140px;
+    --gut: clamp(20px, 5vw, 64px);
+
+    --f-serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+    --f-sans:  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --f-mono:  ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+    --ease: cubic-bezier(.22,.61,.36,1);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 620px at 78% -8%, rgba(69,179,169,.10), transparent 60%),
+      radial-gradient(900px 500px at 4% 12%, rgba(108,156,188,.09), transparent 55%),
+      var(--ink);
+    color:var(--fg);
+    font-family:var(--f-sans);
+    font-size:clamp(15.5px,1.05vw,17px);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* Motif « papier réglé » très discret, appliqué au fond nuit */
+  .ledger-bg{ position:relative; }
+  .ledger-bg::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:linear-gradient(to bottom, var(--hair-soft) 1px, transparent 1px);
+    background-size:100% 34px;
+    -webkit-mask-image:linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+            mask-image:linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    opacity:.5; pointer-events:none;
+  }
+
+  a{ color:var(--teal-br); text-decoration:none; }
+  a:hover{ color:var(--gold-br); }
+
+  img,svg{ display:block; max-width:100%; }
+
+  h1,h2,h3{ font-family:var(--f-serif); font-weight:600; letter-spacing:-.012em; text-wrap:balance; margin:0; }
+  p{ margin:0; }
+
+  /* Focus visible cohérent */
+  a:focus-visible, button:focus-visible, input:focus-visible,
+  select:focus-visible, textarea:focus-visible, .btn:focus-visible{
+    outline:2px solid var(--teal-br);
+    outline-offset:3px;
+    border-radius:3px;
+  }
+
+  .wrap{ width:min(100% - calc(var(--gut) * 2), var(--maxw)); margin-inline:auto; }
+
+  /* -------- Eyebrow / index de compte -------- */
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:.6em;
+    font-family:var(--f-mono);
+    font-size:.72rem; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--fg-dim);
+  }
+  .eyebrow::before{
+    content:""; width:26px; height:1px; background:var(--gold);
+    display:inline-block; opacity:.85;
+  }
+  .idx{ font-family:var(--f-mono); color:var(--gold); font-size:.72rem; letter-spacing:.2em; }
+
+  /* -------- Boutons -------- */
+  .btn{
+    --bg:var(--teal); --bd:var(--teal); --tx:#052220;
+    display:inline-flex; align-items:center; gap:.6em;
+    font-family:var(--f-sans); font-weight:600; font-size:.94rem;
+    letter-spacing:.01em;
+    padding:.82em 1.4em; border:1px solid var(--bd);
+    background:var(--bg); color:var(--tx);
+    border-radius:2px; cursor:pointer;
+    transition:transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease), color .25s var(--ease);
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 10px 30px -12px rgba(69,179,169,.6); color:#052220; }
+  .btn .arrow{ transition:transform .25s var(--ease); }
+  .btn:hover .arrow{ transform:translateX(3px); }
+  .btn--ghost{ --bg:transparent; --tx:var(--fg); --bd:var(--hair); }
+  .btn--ghost:hover{ --tx:var(--gold-br); box-shadow:none; border-color:var(--gold); background:rgba(198,168,103,.06); }
+
+  /* -------- Skip link -------- */
+  .skip{
+    position:absolute; left:12px; top:-60px; z-index:100;
+    background:var(--teal); color:#052220; padding:.6em 1em; border-radius:2px;
+    font-weight:600; transition:top .2s var(--ease);
+  }
+  .skip:focus{ top:12px; color:#052220; }
+
+  /* ============ HEADER ============ */
+  header.site{
+    position:sticky; top:0; z-index:50;
+    background:rgba(8,21,31,.72);
+    backdrop-filter:blur(12px) saturate(140%);
+    -webkit-backdrop-filter:blur(12px) saturate(140%);
+    border-bottom:1px solid var(--hair-cool);
+  }
+  .nav{
+    display:flex; align-items:center; gap:1.2rem;
+    padding:.85rem 0;
+  }
+  .brand{ display:flex; align-items:center; gap:.7rem; color:var(--fg); }
+  .brand:hover{ color:var(--fg); }
+  .brand .mark{ width:34px; height:34px; flex:0 0 auto; }
+  .brand .name{ font-family:var(--f-serif); font-size:1.16rem; letter-spacing:.01em; line-height:1; }
+  .brand .name b{ font-weight:600; }
+  .brand .sub{
+    display:block; font-family:var(--f-mono); font-size:.6rem;
+    letter-spacing:.34em; text-transform:uppercase; color:var(--fg-dim);
+    margin-top:.35em;
+  }
+  nav.links{ margin-left:auto; display:flex; gap:1.5rem; align-items:center; }
+  nav.links a{
+    color:var(--fg-dim); font-size:.92rem; font-weight:500; position:relative; padding:.2em 0;
+  }
+  nav.links a::after{
+    content:""; position:absolute; left:0; bottom:-2px; height:1px; width:0; background:var(--gold);
+    transition:width .28s var(--ease);
+  }
+  nav.links a:hover{ color:var(--fg); }
+  nav.links a:hover::after{ width:100%; }
+  .nav .btn{ padding:.62em 1.1em; font-size:.88rem; }
+
+  @media (max-width:860px){
+    nav.links{ display:none; }
+  }
+
+  /* ============ HERO ============ */
+  .hero{ position:relative; overflow:hidden; padding:clamp(48px,7vw,90px) 0 clamp(40px,6vw,72px); }
+  .hero-grid{
+    display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(32px,5vw,64px); align-items:center;
+  }
+  @media (max-width:920px){ .hero-grid{ grid-template-columns:1fr; } }
+
+  .hero h1{
+    font-size:clamp(2.3rem,5.4vw,3.9rem); line-height:1.04; margin:.5rem 0 0;
+  }
+  .hero h1 .accent{ color:var(--teal-br); font-style:italic; }
+  .hero .lead{
+    color:var(--fg-dim); font-size:clamp(1.02rem,1.5vw,1.18rem); max-width:46ch;
+    margin-top:1.3rem;
+  }
+  .hero-cta{ display:flex; gap:.8rem; flex-wrap:wrap; margin-top:1.9rem; }
+  .trust{
+    display:flex; gap:1.4rem; flex-wrap:wrap; margin-top:2.1rem;
+    padding-top:1.5rem; border-top:1px solid var(--hair-cool);
+    font-size:.85rem; color:var(--fg-dim);
+  }
+  .trust .t{ display:flex; align-items:center; gap:.5em; }
+  .trust svg{ width:16px; height:16px; color:var(--teal); flex:0 0 auto; }
+
+  /* Carte « bilan illustratif » — visuel hero */
+  .card-ledger{
+    position:relative;
+    background:linear-gradient(180deg, var(--slate) 0%, var(--night) 100%);
+    border:1px solid var(--hair-cool);
+    border-radius:6px;
+    padding:1.5rem 1.5rem 1.35rem;
+    box-shadow:0 40px 80px -40px rgba(0,0,0,.7), inset 0 1px 0 rgba(233,240,244,.04);
+  }
+  .card-ledger::before{
+    content:""; position:absolute; left:0; top:0; right:0; height:3px;
+    background:linear-gradient(90deg, transparent, var(--gold) 22%, var(--gold) 78%, transparent);
+    opacity:.7; border-radius:6px 6px 0 0;
+  }
+  .card-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:.2rem; }
+  .card-head .ttl{ font-family:var(--f-serif); font-size:1.15rem; }
+  .card-head .tag{ font-family:var(--f-mono); font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
+  .card-sub{ font-size:.76rem; color:var(--fg-mute); margin-bottom:1rem; }
+
+  .spark{ width:100%; height:96px; margin:.4rem 0 1.1rem; }
+
+  .rows{ font-family:var(--f-mono); font-size:.9rem; }
+  .row{
+    display:grid; grid-template-columns:1fr auto; gap:1rem;
+    padding:.5rem 0; border-bottom:1px solid var(--hair-soft);
+    align-items:baseline;
+  }
+  .row:last-child{ border-bottom:none; }
+  .row .lbl{ color:var(--fg-dim); font-family:var(--f-sans); font-size:.88rem; }
+  .row .val{ color:var(--fg); font-variant-numeric:tabular-nums; letter-spacing:.01em; }
+  .row.total{ margin-top:.35rem; padding-top:.7rem; border-top:1px solid var(--hair); }
+  .row.total .lbl{ color:var(--fg); font-weight:600; }
+  .row.total .val{ color:var(--teal-br); font-size:1.05rem; }
+  .row .chip{ color:var(--teal); }
+  .chip-neg{ color:var(--steel); }
+
+  /* ============ Sections génériques ============ */
+  section{ padding:clamp(56px,8vw,104px) 0; position:relative; }
+  .sec-head{ max-width:60ch; margin-bottom:clamp(30px,4vw,52px); }
+  .sec-head h2{ font-size:clamp(1.9rem,3.6vw,2.7rem); line-height:1.08; margin-top:.7rem; }
+  .sec-head p{ color:var(--fg-dim); margin-top:1rem; font-size:1.05rem; }
+
+  .band{ border-top:1px solid var(--hair-cool); }
+
+  /* ============ Expertises ============ */
+  .expertise-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--hair-cool); border:1px solid var(--hair-cool); border-radius:6px; overflow:hidden;
+  }
+  @media (max-width:840px){ .expertise-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .expertise-grid{ grid-template-columns:1fr; } }
+  .xp{
+    background:linear-gradient(180deg, rgba(20,41,58,.65), rgba(12,30,46,.65));
+    padding:1.7rem 1.6rem 1.8rem; position:relative;
+    transition:background .3s var(--ease), transform .3s var(--ease);
+  }
+  .xp:hover{ background:linear-gradient(180deg, rgba(26,49,69,.9), rgba(16,36,54,.9)); }
+  .xp .num{ font-family:var(--f-mono); font-size:.7rem; letter-spacing:.2em; color:var(--gold); }
+  .xp-ico{
+    width:46px; height:46px; margin:1.1rem 0 1.1rem;
+    color:var(--teal); border:1px solid var(--hair); border-radius:8px; padding:9px;
+    background:rgba(69,179,169,.05);
+    transition:color .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .xp:hover .xp-ico{ color:var(--teal-br); border-color:var(--teal); box-shadow:0 0 0 4px rgba(69,179,169,.08); }
+  .xp h3{ font-size:1.24rem; }
+  .xp p{ color:var(--fg-dim); font-size:.94rem; margin-top:.6rem; }
+  .xp ul{ list-style:none; padding:0; margin:1rem 0 0; display:flex; flex-direction:column; gap:.42rem; }
+  .xp li{ font-size:.85rem; color:var(--fg-mute); font-family:var(--f-mono); display:flex; gap:.6em; align-items:baseline; }
+  .xp li::before{ content:"—"; color:var(--gold); }
+
+  /* ============ Approche + chiffres ============ */
+  .approach-grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(32px,5vw,64px); align-items:start; }
+  @media (max-width:900px){ .approach-grid{ grid-template-columns:1fr; } }
+
+  .steps{ display:flex; flex-direction:column; }
+  .step{
+    display:grid; grid-template-columns:auto 1fr; gap:1.3rem;
+    padding:1.35rem 0; border-top:1px solid var(--hair-cool);
+  }
+  .step:first-child{ border-top:none; padding-top:0; }
+  .step .st-n{
+    font-family:var(--f-serif); font-size:1.5rem; color:var(--teal-br);
+    line-height:1; width:2.4rem; text-align:right;
+  }
+  .step h3{ font-size:1.16rem; }
+  .step p{ color:var(--fg-dim); font-size:.92rem; margin-top:.4rem; }
+
+  .stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--hair-cool); border:1px solid var(--hair); border-radius:6px; overflow:hidden;
+  }
+  .stat{ background:var(--night); padding:1.5rem 1.4rem; }
+  .stat .big{
+    font-family:var(--f-serif); font-size:clamp(2.2rem,5vw,3rem); color:var(--fg);
+    line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums;
+  }
+  .stat .big .u{ color:var(--gold); font-size:.55em; }
+  .stat .lbl{ color:var(--fg-dim); font-size:.86rem; margin-top:.55rem; }
+  .stats-note{
+    grid-column:1/-1; background:var(--slate); padding:.7rem 1.4rem;
+    font-family:var(--f-mono); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--fg-mute); border-top:1px solid var(--hair-cool);
+  }
+
+  /* ============ Vitrine « grand-livre » ============ */
+  .showcase{ background:linear-gradient(180deg, var(--night), var(--ink)); }
+  .book{
+    background:
+      linear-gradient(180deg, rgba(20,41,58,.5), rgba(10,25,38,.5));
+    border:1px solid var(--hair-cool);
+    border-radius:8px; overflow:hidden;
+    box-shadow:0 50px 90px -50px rgba(0,0,0,.8);
+  }
+  .book-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:1.1rem 1.5rem; border-bottom:1px solid var(--hair);
+    background:rgba(198,168,103,.05);
+  }
+  .book-head .bt{ font-family:var(--f-serif); font-size:1.1rem; }
+  .book-head .by{ font-family:var(--f-mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
+  .book-cols{ display:grid; grid-template-columns:1fr 1fr; }
+  @media (max-width:680px){ .book-cols{ grid-template-columns:1fr; } }
+  .book-col{ padding:1.4rem 1.5rem; }
+  .book-col + .book-col{ border-left:1px solid var(--hair-cool); }
+  @media (max-width:680px){ .book-col + .book-col{ border-left:none; border-top:1px solid var(--hair-cool); } }
+  .book-col h4{
+    font-family:var(--f-mono); font-size:.68rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--teal-br); margin:0 0 .9rem; font-weight:600;
+  }
+  .lr{ display:grid; grid-template-columns:1fr auto; padding:.46rem 0; border-bottom:1px dotted var(--hair-cool); align-items:baseline; }
+  .lr:last-child{ border-bottom:none; }
+  .lr .k{ font-size:.9rem; color:var(--fg-dim); }
+  .lr .v{ font-family:var(--f-mono); font-size:.9rem; color:var(--fg); font-variant-numeric:tabular-nums; }
+  .lr.sum{ margin-top:.4rem; border-top:1px solid var(--gold); border-bottom:none; padding-top:.7rem; }
+  .lr.sum .k{ color:var(--fg); font-weight:600; }
+  .lr.sum .v{ color:var(--gold-br); font-size:1rem; }
+
+  /* ============ Équipe ============ */
+  .team-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; }
+  @media (max-width:840px){ .team-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:460px){ .team-grid{ grid-template-columns:1fr; } }
+  .member{
+    text-align:center; padding:1.4rem 1rem 1.5rem;
+    border:1px solid var(--hair-cool); border-radius:6px;
+    background:linear-gradient(180deg, rgba(20,41,58,.4), transparent);
+    transition:border-color .3s var(--ease), transform .3s var(--ease);
+  }
+  .member:hover{ border-color:var(--hair); transform:translateY(-3px); }
+  .avatar{ width:88px; height:88px; margin:0 auto .95rem; }
+  .member .mn{ font-family:var(--f-serif); font-size:1.12rem; }
+  .member .mr{ font-size:.82rem; color:var(--teal-br); margin-top:.2rem; }
+  .member .md{ font-size:.78rem; color:var(--fg-mute); margin-top:.5rem; font-family:var(--f-mono); }
+
+  /* ============ Témoignages ============ */
+  .quotes{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; }
+  @media (max-width:840px){ .quotes{ grid-template-columns:1fr; } }
+  .quote{
+    padding:1.6rem 1.5rem 1.5rem; border:1px solid var(--hair-cool); border-radius:6px;
+    background:linear-gradient(180deg, rgba(20,41,58,.45), rgba(12,30,46,.3));
+    position:relative;
+  }
+  .quote .mark{ font-family:var(--f-serif); font-size:3rem; line-height:.6; color:var(--gold); opacity:.55; }
+  .quote blockquote{ margin:.4rem 0 0; font-size:1rem; color:var(--fg); font-style:italic; }
+  .quote figcaption{ margin-top:1.1rem; padding-top:1rem; border-top:1px solid var(--hair-cool); display:flex; align-items:center; gap:.7rem; }
+  .qa{ width:38px; height:38px; flex:0 0 auto; }
+  .quote .qn{ font-size:.9rem; color:var(--fg); font-weight:600; }
+  .quote .qm{ font-size:.76rem; color:var(--fg-dim); }
+
+  /* ============ Contact ============ */
+  .contact{ background:linear-gradient(180deg, var(--ink), var(--night)); }
+  .contact-grid{ display:grid; grid-template-columns:.85fr 1.15fr; gap:clamp(32px,5vw,64px); align-items:start; }
+  @media (max-width:900px){ .contact-grid{ grid-template-columns:1fr; } }
+  .coords{ display:flex; flex-direction:column; gap:1.3rem; }
+  .coord{ display:grid; grid-template-columns:auto 1fr; gap:1rem; align-items:start; }
+  .coord svg{ width:22px; height:22px; color:var(--teal); margin-top:.15rem; flex:0 0 auto; }
+  .coord .ct{ font-family:var(--f-mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--fg-mute); }
+  .coord .cv{ font-size:1rem; color:var(--fg); margin-top:.15rem; }
+  .coord .cv a{ color:var(--fg); }
+  .coord .cv a:hover{ color:var(--teal-br); }
+
+  form.pro{
+    background:linear-gradient(180deg, var(--slate), var(--night));
+    border:1px solid var(--hair-cool); border-radius:8px; padding:clamp(1.4rem,3vw,2rem);
+  }
+  .field{ margin-bottom:1.15rem; }
+  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:1.15rem; }
+  @media (max-width:520px){ .grid-2{ grid-template-columns:1fr; } }
+  label{ display:block; font-family:var(--f-mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-dim); margin-bottom:.5rem; }
+  .req{ color:var(--gold); }
+  input,select,textarea{
+    width:100%; font-family:var(--f-sans); font-size:.96rem; color:var(--fg);
+    background:var(--ink); border:1px solid var(--hair-cool); border-radius:3px;
+    padding:.72em .85em; transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  input::placeholder,textarea::placeholder{ color:var(--fg-mute); }
+  input:focus,select:focus,textarea:focus{ border-color:var(--teal); box-shadow:0 0 0 3px rgba(69,179,169,.14); outline:none; }
+  select{ appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--fg-dim) 50%),linear-gradient(135deg,var(--fg-dim) 50%,transparent 50%); background-position:calc(100% - 18px) 55%,calc(100% - 13px) 55%; background-size:5px 5px,5px 5px; background-repeat:no-repeat; }
+  textarea{ resize:vertical; min-height:120px; }
+  .consent{ display:flex; gap:.7rem; align-items:flex-start; font-size:.82rem; color:var(--fg-dim); font-family:var(--f-sans); text-transform:none; letter-spacing:0; }
+  .consent input{ width:auto; margin-top:.2rem; accent-color:var(--teal); }
+  .form-foot{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:.4rem; }
+  .form-note{ font-family:var(--f-mono); font-size:.66rem; color:var(--fg-mute); letter-spacing:.06em; }
+
+  /* ============ Mentions légales ============ */
+  .legal{ background:var(--ink); border-top:1px solid var(--hair-cool); }
+  .disclaimer{
+    display:flex; gap:.9rem; align-items:flex-start;
+    border:1px solid var(--hair); border-left:2px solid var(--gold);
+    background:rgba(198,168,103,.06);
+    border-radius:4px; padding:1rem 1.2rem; margin-bottom:2rem;
+    color:var(--fg); font-size:.92rem;
+  }
+  .disclaimer svg{ width:20px; height:20px; color:var(--gold); flex:0 0 auto; margin-top:.15rem; }
+  .legal-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4rem 2rem; }
+  @media (max-width:820px){ .legal-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:460px){ .legal-grid{ grid-template-columns:1fr; } }
+  .legal-grid dt{ font-family:var(--f-mono); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--fg-mute); }
+  .legal-grid dd{ margin:.4rem 0 0; font-size:.9rem; color:var(--fg-dim); line-height:1.5; }
+
+  /* ============ FOOTER ============ */
+  footer.site{
+    background:var(--ink); border-top:1px solid var(--hair-cool);
+    padding:2.6rem 0 2.2rem;
+  }
+  .foot{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; flex-wrap:wrap; }
+  .foot .fb{ display:flex; align-items:center; gap:.7rem; color:var(--fg-dim); font-size:.86rem; }
+  .foot .credit{ font-size:.86rem; color:var(--fg-dim); text-align:right; }
+  .foot .credit a{ color:var(--teal-br); font-weight:600; }
+  .foot .credit a:hover{ color:var(--gold-br); }
+  .foot .credit .dm{ display:block; font-family:var(--f-mono); font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--fg-mute); margin-top:.35rem; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    .btn:hover{ transform:none; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Aller au contenu</a>
+
+<header class="site">
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="#top" aria-label="Meridiem Fiduciaire — accueil">
+        <svg class="mark" viewBox="0 0 40 40" role="img" aria-hidden="true">
+          <circle cx="20" cy="20" r="18" fill="none" stroke="var(--hair)" stroke-width="1"/>
+          <circle cx="20" cy="20" r="12.5" fill="none" stroke="rgba(139,168,188,.28)" stroke-width="1"/>
+          <line x1="2" y1="20" x2="38" y2="20" stroke="var(--gold)" stroke-width="1.1"/>
+          <line x1="20" y1="6.5" x2="20" y2="33.5" stroke="rgba(139,168,188,.25)" stroke-width="1"/>
+          <circle cx="20" cy="20" r="2.4" fill="var(--teal)"/>
+          <path d="M13 26.5V16l7 6 7-6v10.5" fill="none" stroke="var(--fg)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"/>
+        </svg>
+        <span class="name"><b>Meridiem</b><span class="sub">Fiduciaire</span></span>
+      </a>
+      <nav class="links" aria-label="Navigation principale">
+        <a href="#expertises">Expertises</a>
+        <a href="#approche">Approche</a>
+        <a href="#equipe">Équipe</a>
+        <a href="#temoignages">Avis</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="btn" href="#contact">Prendre rendez-vous</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <span id="top"></span>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero ledger-bg" aria-labelledby="hero-title">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Fiduciaire · Nyon &amp; arc lémanique</span>
+          <h1 id="hero-title">La comptabilité au cordeau,<br><span class="accent">votre sérénité</span> pour horizon.</h1>
+          <p class="lead">Meridiem accompagne les PME, indépendants et professions libérales de Suisse romande : tenue de comptes, fiscalité, salaires et conseil. Des chiffres justes, à l’heure, expliqués.</p>
+          <div class="hero-cta">
+            <a class="btn" href="#contact">Prendre rendez-vous <span class="arrow" aria-hidden="true">→</span></a>
+            <a class="btn btn--ghost" href="#expertises">Nos expertises</a>
+          </div>
+          <div class="trust">
+            <span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg> Secret fiscal &amp; nLPD respectés</span>
+            <span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Réponse sous 48 h ouvrées</span>
+            <span class="t"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Normes Swiss GAAP &amp; CO</span>
+          </div>
+        </div>
+
+        <!-- Carte bilan illustratif -->
+        <div class="card-ledger" role="img" aria-label="Illustration : extrait de tableau de bord comptable avec chiffres fictifs.">
+          <div class="card-head">
+            <span class="ttl">Tableau de bord</span>
+            <span class="tag">Aperçu client</span>
+          </div>
+          <p class="card-sub">Exercice en cours · chiffres illustratifs (CHF)</p>
+
+          <svg class="spark" viewBox="0 0 320 96" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="rgba(69,179,169,.30)"/>
+                <stop offset="1" stop-color="rgba(69,179,169,0)"/>
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="24" x2="320" y2="24" stroke="var(--hair-soft)" stroke-width="1"/>
+            <line x1="0" y1="48" x2="320" y2="48" stroke="var(--hair-soft)" stroke-width="1"/>
+            <line x1="0" y1="72" x2="320" y2="72" stroke="var(--hair-soft)" stroke-width="1"/>
+            <path d="M0 78 L46 70 L92 74 L138 56 L184 60 L230 40 L276 34 L320 20 L320 96 L0 96 Z" fill="url(#sg)"/>
+            <path d="M0 78 L46 70 L92 74 L138 56 L184 60 L230 40 L276 34 L320 20" fill="none" stroke="var(--teal-br)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <circle cx="320" cy="20" r="3.4" fill="var(--gold)"/>
+          </svg>
+
+          <div class="rows">
+            <div class="row"><span class="lbl">Chiffre d’affaires</span><span class="val">842 500 <span class="chip">▲</span></span></div>
+            <div class="row"><span class="lbl">Charges d’exploitation</span><span class="val">571 300 <span class="chip-neg">▼</span></span></div>
+            <div class="row"><span class="lbl">TVA à décompter (T3)</span><span class="val">21 640</span></div>
+            <div class="row total"><span class="lbl">Résultat net estimé</span><span class="val">271 200</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXPERTISES ============ -->
+  <section id="expertises" class="band" aria-labelledby="xp-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="idx">01 — Prestations</span>
+        <h2 id="xp-title">Cinq domaines, une seule exigence de précision.</h2>
+        <p>De la saisie quotidienne à la clôture annuelle, un interlocuteur unique et des livrables conformes au droit suisse.</p>
+      </div>
+
+      <div class="expertise-grid">
+        <article class="xp">
+          <span class="num">§ 01</span>
+          <svg class="xp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/>
+            <line x1="3.5" y1="8" x2="20.5" y2="8"/><line x1="9" y1="8" x2="9" y2="20.5"/><line x1="15" y1="8" x2="15" y2="20.5"/>
+            <line x1="3.5" y1="12.5" x2="20.5" y2="12.5"/><line x1="3.5" y1="16.5" x2="20.5" y2="16.5"/>
+          </svg>
+          <h3>Comptabilité</h3>
+          <p>Tenue complète ou révisée, bouclement annuel et reporting mensuel lisible pour piloter votre activité.</p>
+          <ul><li>Tenue &amp; saisie</li><li>Bilan &amp; compte de résultat</li><li>Reporting sur mesure</li></ul>
+        </article>
+
+        <article class="xp">
+          <span class="num">§ 02</span>
+          <svg class="xp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M6.5 3.5h7l4 4v13h-11z"/><path d="M13.5 3.5v4h4"/>
+            <circle cx="10" cy="12" r="1.3"/><circle cx="14" cy="16.4" r="1.3"/><line x1="15" y1="10.8" x2="9" y2="17.6"/>
+          </svg>
+          <h3>Fiscalité &amp; TVA</h3>
+          <p>Déclarations d’impôt, décomptes TVA et optimisation légale — pour l’entreprise comme pour ses dirigeants.</p>
+          <ul><li>Déclarations PP &amp; PM</li><li>Décomptes TVA trimestriels</li><li>Représentation fiscale</li></ul>
+        </article>
+
+        <article class="xp">
+          <span class="num">§ 03</span>
+          <svg class="xp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <ellipse cx="9" cy="6.5" rx="5" ry="2.3"/><path d="M4 6.5v4c0 1.27 2.24 2.3 5 2.3s5-1.03 5-2.3v-4"/><path d="M4 10.5v4c0 1.27 2.24 2.3 5 2.3"/>
+            <circle cx="16.5" cy="15.5" r="4.7"/><path d="M16.5 13.2v4.6M14.6 15.5h3.8"/>
+          </svg>
+          <h3>Salaires &amp; AVS</h3>
+          <p>Gestion des salaires, décomptes AVS/LPP/LAA et attestations — la paie juste, dans les délais légaux.</p>
+          <ul><li>Fiches de salaire</li><li>Charges sociales</li><li>Certificats &amp; annonces</li></ul>
+        </article>
+
+        <article class="xp">
+          <span class="num">§ 04</span>
+          <svg class="xp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M4 20.5h16"/><path d="M6 20.5V9l6-4 6 4v11.5"/>
+            <path d="M9.5 20.5V14h5v6.5"/><line x1="9.5" y1="14" x2="14.5" y2="14"/>
+          </svg>
+          <h3>Création d’entreprise</h3>
+          <p>Choix de la forme juridique, statuts, inscription au RC et démarches d’ouverture, accompagnés de bout en bout.</p>
+          <ul><li>Raison individuelle / Sàrl / SA</li><li>Statuts &amp; capital</li><li>Inscription au registre</li></ul>
+        </article>
+
+        <article class="xp">
+          <span class="num">§ 05</span>
+          <svg class="xp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5"/><polygon points="12,6.2 13.7,12 12,17.8 10.3,12"/><circle cx="12" cy="12" r="1"/>
+          </svg>
+          <h3>Conseil PME</h3>
+          <p>Budget, trésorerie, tableaux de bord et accompagnement dans les décisions — un cap chiffré, pas un pari.</p>
+          <ul><li>Budget &amp; prévisionnel</li><li>Analyse de rentabilité</li><li>Aide à la décision</li></ul>
+        </article>
+
+        <article class="xp" aria-hidden="false">
+          <span class="num">§ 06</span>
+          <svg class="xp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M12 3.5c2 2.3 3 4.6 3 7.5a3 3 0 0 1-6 0c0-2.9 1-5.2 3-7.5z"/><path d="M7 20.5h10"/><path d="M9 20.5c0-2 1.3-3.4 3-3.4s3 1.4 3 3.4"/>
+          </svg>
+          <h3>Un accompagnement continu</h3>
+          <p>Au-delà des mandats, un contact disponible toute l’année pour vos questions du quotidien — sans compteur qui tourne à chaque appel.</p>
+          <ul><li>Interlocuteur unique</li><li>Point trimestriel</li><li>Veille réglementaire</li></ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ APPROCHE + CHIFFRES ============ -->
+  <section id="approche" class="band" aria-labelledby="ap-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="idx">02 — Méthode</span>
+        <h2 id="ap-title">Une méthode en quatre temps, du diagnostic à la clôture.</h2>
+        <p>Chaque mandat suit la même trame ordonnée : vous savez toujours où vous en êtes, et pourquoi.</p>
+      </div>
+
+      <div class="approach-grid">
+        <div class="steps">
+          <div class="step">
+            <div class="st-n">01</div>
+            <div>
+              <h3>Diagnostic</h3>
+              <p>Analyse de votre situation, de vos obligations et de vos objectifs. Nous cadrons le mandat et son calendrier.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="st-n">02</div>
+            <div>
+              <h3>Mise en place</h3>
+              <p>Plan comptable, outils et flux de pièces. Nous reprenons l’existant proprement, sans rupture pour votre activité.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="st-n">03</div>
+            <div>
+              <h3>Suivi régulier</h3>
+              <p>Tenue mensuelle, décomptes TVA et salaires aux échéances. Un reporting clair, à date fixe, sans surprise.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="st-n">04</div>
+            <div>
+              <h3>Clôture &amp; conseil</h3>
+              <p>Bouclement, déclarations fiscales et recommandations d’optimisation pour l’exercice suivant.</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stats" role="group" aria-label="Chiffres-clés illustratifs">
+            <div class="stat"><div class="big">18<span class="u"> ans</span></div><div class="lbl">d’expérience cumulée du cabinet</div></div>
+            <div class="stat"><div class="big">220<span class="u">+</span></div><div class="lbl">PME &amp; indépendants accompagnés</div></div>
+            <div class="stat"><div class="big">1 400</div><div class="lbl">décomptes TVA traités par an</div></div>
+            <div class="stat"><div class="big">48<span class="u"> h</span></div><div class="lbl">délai de réponse moyen visé</div></div>
+            <p class="stats-note">Chiffres illustratifs — site de démonstration, aucune valeur réelle.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VITRINE GRAND-LIVRE ============ -->
+  <section class="showcase band" aria-labelledby="sc-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="idx">03 — Livrable type</span>
+        <h2 id="sc-title">Un bilan lisible, colonne par colonne.</h2>
+        <p>Extrait illustratif d’un bouclement annuel : actif et passif alignés, totaux qui tombent juste, chaque poste à sa place.</p>
+      </div>
+
+      <div class="book" role="img" aria-label="Illustration d’un bilan comptable fictif présentant l’actif et le passif équilibrés à 486 900 francs.">
+        <div class="book-head">
+          <span class="bt">Bilan au 31.12 — extrait</span>
+          <span class="by">Exemple · CHF</span>
+        </div>
+        <div class="book-cols">
+          <div class="book-col">
+            <h4>Actif</h4>
+            <div class="lr"><span class="k">Liquidités &amp; banque</span><span class="v">128 400</span></div>
+            <div class="lr"><span class="k">Débiteurs</span><span class="v">96 750</span></div>
+            <div class="lr"><span class="k">Stock &amp; travaux en cours</span><span class="v">54 200</span></div>
+            <div class="lr"><span class="k">Immobilisations</span><span class="v">207 550</span></div>
+            <div class="lr sum"><span class="k">Total de l’actif</span><span class="v">486 900</span></div>
+          </div>
+          <div class="book-col">
+            <h4>Passif</h4>
+            <div class="lr"><span class="k">Créanciers &amp; fournisseurs</span><span class="v">72 300</span></div>
+            <div class="lr"><span class="k">Dettes sociales &amp; TVA</span><span class="v">41 850</span></div>
+            <div class="lr"><span class="k">Provisions</span><span class="v">38 000</span></div>
+            <div class="lr"><span class="k">Fonds propres</span><span class="v">334 750</span></div>
+            <div class="lr sum"><span class="k">Total du passif</span><span class="v">486 900</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ÉQUIPE ============ -->
+  <section id="equipe" class="band" aria-labelledby="eq-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="idx">04 — Le cabinet</span>
+        <h2 id="eq-title">Des visages derrière les chiffres.</h2>
+        <p>Une équipe à taille humaine : vous connaissez la personne qui tient vos comptes, elle connaît votre dossier.</p>
+      </div>
+
+      <div class="team-grid">
+        <article class="member">
+          <svg class="avatar" viewBox="0 0 88 88" role="img" aria-label="Avatar aux initiales C. M.">
+            <circle cx="44" cy="44" r="42" fill="none" stroke="var(--hair)" stroke-width="1.2"/>
+            <circle cx="44" cy="44" r="35" fill="rgba(69,179,169,.10)"/>
+            <text x="44" y="44" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="27" fill="var(--teal-br)" letter-spacing="1">CM</text>
+            <path d="M44 6 A38 38 0 0 1 82 44" fill="none" stroke="var(--gold)" stroke-width="1.4"/>
+          </svg>
+          <div class="mn">C. Morier</div>
+          <div class="mr">Associée · Experte-comptable dipl.</div>
+          <div class="md">Comptabilité · Clôtures</div>
+        </article>
+
+        <article class="member">
+          <svg class="avatar" viewBox="0 0 88 88" role="img" aria-label="Avatar aux initiales R. F.">
+            <circle cx="44" cy="44" r="42" fill="none" stroke="var(--hair)" stroke-width="1.2"/>
+            <circle cx="44" cy="44" r="35" fill="rgba(108,156,188,.12)"/>
+            <text x="44" y="44" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="27" fill="var(--steel)" letter-spacing="1">RF</text>
+            <path d="M44 6 A38 38 0 0 1 82 44" fill="none" stroke="var(--gold)" stroke-width="1.4"/>
+          </svg>
+          <div class="mn">R. Fontana</div>
+          <div class="mr">Fiscaliste diplômé</div>
+          <div class="md">Impôts · TVA</div>
+        </article>
+
+        <article class="member">
+          <svg class="avatar" viewBox="0 0 88 88" role="img" aria-label="Avatar aux initiales N. B.">
+            <circle cx="44" cy="44" r="42" fill="none" stroke="var(--hair)" stroke-width="1.2"/>
+            <circle cx="44" cy="44" r="35" fill="rgba(69,179,169,.10)"/>
+            <text x="44" y="44" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="27" fill="var(--teal-br)" letter-spacing="1">NB</text>
+            <path d="M44 6 A38 38 0 0 1 82 44" fill="none" stroke="var(--gold)" stroke-width="1.4"/>
+          </svg>
+          <div class="mn">N. Broulis</div>
+          <div class="mr">Responsable salaires &amp; AVS</div>
+          <div class="md">Paie · Charges sociales</div>
+        </article>
+
+        <article class="member">
+          <svg class="avatar" viewBox="0 0 88 88" role="img" aria-label="Avatar aux initiales S. V.">
+            <circle cx="44" cy="44" r="42" fill="none" stroke="var(--hair)" stroke-width="1.2"/>
+            <circle cx="44" cy="44" r="35" fill="rgba(108,156,188,.12)"/>
+            <text x="44" y="44" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="27" fill="var(--steel)" letter-spacing="1">SV</text>
+            <path d="M44 6 A38 38 0 0 1 82 44" fill="none" stroke="var(--gold)" stroke-width="1.4"/>
+          </svg>
+          <div class="mn">S. Vionnet</div>
+          <div class="mr">Conseil &amp; création d’entreprise</div>
+          <div class="md">Stratégie · Trésorerie</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TÉMOIGNAGES ============ -->
+  <section id="temoignages" class="band" aria-labelledby="tm-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="idx">05 — Ils nous confient leurs comptes</span>
+        <h2 id="tm-title">La confiance se lit dans la durée.</h2>
+        <p>Témoignages illustratifs, présentés à titre d’exemple pour cette démonstration.</p>
+      </div>
+
+      <div class="quotes">
+        <figure class="quote">
+          <div class="mark" aria-hidden="true">&ldquo;</div>
+          <blockquote>Nous avons enfin des comptes à jour et des décomptes TVA qui partent à l’heure. Le point trimestriel vaut de l’or.</blockquote>
+          <figcaption>
+            <svg class="qa" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="18" fill="none" stroke="var(--hair)"/><text x="19" y="19" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="13" fill="var(--teal-br)">L</text></svg>
+            <div><div class="qn">Léa</div><div class="qm">Boulangerie artisanale · Morges</div></div>
+          </figcaption>
+        </figure>
+
+        <figure class="quote">
+          <div class="mark" aria-hidden="true">&ldquo;</div>
+          <blockquote>À la création de mon bureau, ils ont tout cadré : forme juridique, statuts, salaires. Un vrai soulagement.</blockquote>
+          <figcaption>
+            <svg class="qa" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="18" fill="none" stroke="var(--hair)"/><text x="19" y="19" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="13" fill="var(--steel)">M</text></svg>
+            <div><div class="qn">Marc</div><div class="qm">Bureau d’architecture · Nyon</div></div>
+          </figcaption>
+        </figure>
+
+        <figure class="quote">
+          <div class="mark" aria-hidden="true">&ldquo;</div>
+          <blockquote>On m’explique les chiffres au lieu de me les asséner. Je prends mes décisions sur des bases claires.</blockquote>
+          <figcaption>
+            <svg class="qa" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="18" fill="none" stroke="var(--hair)"/><text x="19" y="19" text-anchor="middle" dominant-baseline="central" font-family="ui-serif, Georgia, serif" font-size="13" fill="var(--teal-br)">S</text></svg>
+            <div><div class="qn">Sofia</div><div class="qm">Cabinet médical · Lausanne</div></div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section id="contact" class="contact band" aria-labelledby="ct-title">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="idx">06 — Contact</span>
+        <h2 id="ct-title">Prenons rendez-vous.</h2>
+        <p>Un premier entretien sans engagement pour cerner vos besoins. Réponse sous 48 heures ouvrées.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="coords">
+          <div class="coord">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21s-7-5.2-7-10.5A7 7 0 0 1 19 10.5C19 15.8 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.5"/></svg>
+            <div><div class="ct">Cabinet</div><div class="cv">Avenue de la Gare 00<br>1260 Nyon, Suisse</div></div>
+          </div>
+          <div class="coord">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L20 13l1 6-2 1c-8 0-14-6-14-14z"/></svg>
+            <div><div class="ct">Téléphone</div><div class="cv"><a href="tel:+41210000000">+41 21 000 00 00</a></div></div>
+          </div>
+          <div class="coord">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="1.5"/><path d="M4 7l8 5.5L20 7"/></svg>
+            <div><div class="ct">Courriel</div><div class="cv"><a href="mailto:contact@meridiem-fiduciaire.ch">contact@meridiem-fiduciaire.ch</a></div></div>
+          </div>
+          <div class="coord">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>
+            <div><div class="ct">Horaires</div><div class="cv">Lun–Ven · 08 h 30 – 17 h 30<br>Sur rendez-vous</div></div>
+          </div>
+        </div>
+
+        <form class="pro" aria-label="Formulaire de demande de rendez-vous" onsubmit="return false">
+          <div class="grid-2">
+            <div class="field">
+              <label for="f-nom">Nom &amp; prénom <span class="req" aria-hidden="true">*</span></label>
+              <input id="f-nom" name="nom" type="text" autocomplete="name" placeholder="Jean Dupont" required>
+            </div>
+            <div class="field">
+              <label for="f-soc">Société</label>
+              <input id="f-soc" name="societe" type="text" autocomplete="organization" placeholder="Raison sociale">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label for="f-mail">Courriel <span class="req" aria-hidden="true">*</span></label>
+              <input id="f-mail" name="email" type="email" autocomplete="email" placeholder="vous@exemple.ch" required>
+            </div>
+            <div class="field">
+              <label for="f-tel">Téléphone</label>
+              <input id="f-tel" name="tel" type="tel" autocomplete="tel" placeholder="+41 79 000 00 00">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-obj">Objet de la demande</label>
+            <select id="f-obj" name="objet">
+              <option value="">Sélectionnez…</option>
+              <option>Tenue de comptabilité</option>
+              <option>Fiscalité &amp; TVA</option>
+              <option>Salaires &amp; charges sociales</option>
+              <option>Création d’entreprise</option>
+              <option>Conseil &amp; pilotage</option>
+              <option>Autre demande</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f-msg">Votre message <span class="req" aria-hidden="true">*</span></label>
+            <textarea id="f-msg" name="message" placeholder="Décrivez brièvement votre situation et vos besoins…" required></textarea>
+          </div>
+          <div class="field">
+            <label class="consent" for="f-rgpd">
+              <input id="f-rgpd" name="consent" type="checkbox" required>
+              <span>J’accepte que mes données soient utilisées pour traiter ma demande, conformément à la protection des données (nLPD).</span>
+            </label>
+          </div>
+          <div class="form-foot">
+            <button class="btn" type="submit">Envoyer la demande <span class="arrow" aria-hidden="true">→</span></button>
+            <span class="form-note">Formulaire de démonstration — non fonctionnel.</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MENTIONS LÉGALES ============ -->
+  <section class="legal" aria-labelledby="lg-title">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:1.6rem;">
+        <span class="idx">07 — Informations légales</span>
+        <h2 id="lg-title" style="font-size:clamp(1.5rem,2.6vw,2rem);">Mentions légales</h2>
+      </div>
+
+      <div class="disclaimer" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3l9 16H3z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg>
+        <p><strong>Site de démonstration fictif réalisé par Wahl BI Consulting</strong> — ne correspond à aucune entreprise réelle. Raison sociale, adresses, coordonnées, chiffres et témoignages sont illustratifs et n’ont aucune valeur contractuelle.</p>
+      </div>
+
+      <dl class="legal-grid">
+        <div><dt>Raison sociale</dt><dd>Meridiem Fiduciaire SA<br>(société fictive)</dd></div>
+        <div><dt>Siège</dt><dd>Avenue de la Gare 00<br>1260 Nyon (VD), Suisse</dd></div>
+        <div><dt>N° IDE</dt><dd>CHE-000.000.000<br>(fictif)</dd></div>
+        <div><dt>Contact</dt><dd>+41 21 000 00 00<br>contact@meridiem-fiduciaire.ch</dd></div>
+        <div><dt>Direction</dt><dd>Le cabinet<br>(direction fictive)</dd></div>
+        <div><dt>Hébergement</dt><dd>Hébergeur générique<br>Centre de données en Suisse</dd></div>
+        <div><dt>Données personnelles</dt><dd>Traitement conforme à la nLPD — aucune donnée réelle n’est collectée sur cette page de démonstration.</dd></div>
+        <div><dt>Conception</dt><dd>Wahl BI Consulting<br>Agence web · Suisse</dd></div>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="foot">
+      <div class="fb">
+        <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="18" fill="none" stroke="var(--hair)" stroke-width="1"/>
+          <line x1="2" y1="20" x2="38" y2="20" stroke="var(--gold)" stroke-width="1"/>
+          <circle cx="20" cy="20" r="2.2" fill="var(--teal)"/>
+        </svg>
+        <span>Meridiem Fiduciaire · Nyon &amp; arc lémanique</span>
+      </div>
+      <div class="credit">
+        Démonstration réalisée par <a href="https://wahl-bi-consulting.ch" target="_blank" rel="noopener noreferrer">Wahl BI Consulting</a>
+        <span class="dm">Entreprise fictive · aucun lien avec une société réelle</span>
+      </div>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

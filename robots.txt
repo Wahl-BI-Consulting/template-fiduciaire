@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fiduciaire.wahl-bi-consulting.ch/sitemap.xml
